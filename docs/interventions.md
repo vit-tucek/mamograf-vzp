@@ -43,7 +43,7 @@ these priors against cost, reach and centre capacity, so its order differs from 
 | 12 | Bundled prevention visit (several screenings in one go) | −2 to +3 | Cochrane (mixed) | medium | women due for several screenings |
 | 13 | Incentives for doctors (bonus, pay per detected cancer) | 0 to +2 | CPSTF, reviews | medium | – |
 | 14 | AI- or LLM-tailored messages | 0 to +2 | RCTs on intent only | low | as message variants in 8 or 10 |
-| 15 | App push (Moje VZP) alone | 0 to +1 | RCT | very low | digital users, always with SMS |
+| 15 | App push (Moje VZP) alone | 0 to +1 | RCT | very low | digital users, always with SMS; the app's real value is as a channel for items 1, 3, 8, 10 and 12 (see *The VZP app as a direct channel*) |
 | 16 | Financial incentives for women (vouchers, lotteries, bonus) | 0 to +1 | RCTs, reviews | medium | – |
 | 17 | Mass media campaign | ~0 | CPSTF | high | – |
 | 18 | Home visits | ~0 | Cochrane | high | – |
@@ -51,7 +51,9 @@ these priors against cost, reach and centre capacity, so its order differs from 
 | 20 | Decision aids | ≤ 0 for uptake | observational, RCT | low | informed choice, not uptake |
 
 Two further levers are not interventions but **choices of whom to target**; they multiply the
-effect of everything above (see *Targeting* at the end).
+effect of everything above (see *Targeting* at the end). The VZP app is not one more intervention
+either: it is a direct, two-way channel that can deliver several of them cheaply and collect
+feedback (see *The VZP app as a direct channel*).
 
 ---
 
@@ -345,6 +347,8 @@ the effect prior centred on zero and outcomes from claims, not from intent surve
 (team call).
 
 **How to test it.** A cheap arm in the SMS factorial (push vs SMS vs both), limited to app users.
+Push alone is the weakest use of the app; see *The VZP app as a direct channel* for the uses that
+carry the stronger interventions.
 
 ## 16. Financial incentives for women
 
@@ -407,6 +411,71 @@ attendance (research brief, ref. 10).
 that the goal is informed uptake, not uptake at any price.
 
 ---
+
+## The VZP app as a direct channel
+
+VZP has an app with good reach among its clients (about 700,000 users; activity and the share among
+women 45+ are not known yet) and wants to develop it into a direct channel to clients, including
+feedback such as questionnaires and polls. A push notification on its own is weak (item 15). The app
+is worth more as a **cheap delivery channel for the interventions that work** and as a **source of
+feedback** that makes targeting and experiments better.
+
+**What the app can deliver.**
+- **Pre-booked slot with one-tap confirm, move or cancel (item 1 in the app).** The strongest
+  intervention needs held slots; the app turns the invitation into "we have booked you on Tuesday
+  at 14:00" and lets the woman move or release the slot at once. Freed slots go back to the centre,
+  which lowers the main cost of pre-booking (SMS before a booked appointment about tripled advance
+  cancellations [`[NHS_SMS2015]`](../PAPERS.md)). VZP already plans to link centre booking with
+  Moje VZP [`[VZP_2026]`](../PAPERS.md).
+- **Barrier questionnaire with a tailored next step (items 3 and 4 in the app).** Women who have not
+  booked within a few weeks get two or three questions: *what is stopping you?* (fear or pain, no time,
+  distance, think a referral is needed, do not think it is needed, screened elsewhere). Each answer
+  triggers its own path: a navigator call, an evening slot, transport information, the "no referral
+  needed" message, or nothing for women screened elsewhere. Navigation works because it targets the
+  woman's barrier [`[CPSTF_NAV]`](../PAPERS.md), [`[DE_PHONE2023]`](../PAPERS.md); asking first in
+  the app reserves the expensive phone call for women whose barrier a call can solve. No trial of an
+  app-based barrier questionnaire was found, so the effect is unknown.
+- **Personal prevention overview (item 12 in the app).** One screen with everything the woman is due
+  for (mammography, cervical screening, preventive gynaecology, colorectal test, GP check-up). Breast
+  and cervical screening behaviour go together [`[DK_CERV_BREAST]`](../PAPERS.md) and so do they in
+  our district data; bundling invitations on paper went the wrong way [`[COCHRANE_INVITE2001]`](../PAPERS.md),
+  so test it rather than assume it.
+- **Better reminder content (items 8 and 10 in the app).** The same messages as SMS and letter
+  ("no referral needed", social norm, booking link), but free, with the booking one tap away and with
+  message variants that are cheap to randomise.
+
+**What VZP gets back.**
+- **Reasons, not just outcomes.** Answers to "why not" label the segments with real barriers and give
+  the uplift model features it cannot get from claims.
+- **Experience after screening.** A two-question poll after the visit (waiting, pain, how she was
+  treated) monitors centre quality and supports the habit of coming back; women who skip their first
+  round attend less later [`[SE_FIRST2025]`](../PAPERS.md).
+- **Reachability.** App activity tells which channel works for whom; it is a feature for the
+  attendance and uplift models and a constraint for the optimiser.
+- **An experiment platform.** Randomisation is nearly free, assignment probabilities are logged
+  automatically and early outcomes (opened, answered, booked) arrive within days, so the app is the
+  natural place for continuous exploration (bandits with a holdout).
+
+**Caveats.**
+- **Self-selection.** App users are more engaged and probably over-represented in the segments that
+  attend anyway; the hardest segments (disconnected, repeatedly non-responding) are likely the least
+  reachable. Effects measured among app users do not carry over to everyone, and the app does not
+  replace letters, SMS or phone for women without it.
+- **Survey bias and fatigue.** Women who answer differ from those who do not; keep questionnaires
+  short and rare, and never make care depend on answering.
+- **Consent.** Using answers for targeting needs explicit consent and a clear purpose (GDPR); report
+  only aggregates.
+- **Outcome from claims.** Clicks and answers are early signals; the primary outcome stays the
+  screening claim within 90 / 180 days.
+
+**How to test it.** Individually randomised among app users, stratified by segment:
+- *App booking:* pre-booked slot with one-tap confirm in the app vs the current letter (first
+  invitation and lapsed 3–4 years).
+- *Channel factorial:* push vs SMS vs both vs neither, crossed with "booking link" vs "no link".
+- *Barrier questionnaire:* questionnaire with a tailored next step vs a standard reminder, among women
+  who have not booked six weeks after the invitation.
+
+Report results for app users only, alongside the share of each segment that uses the app.
 
 ## Targeting: whom to address first
 

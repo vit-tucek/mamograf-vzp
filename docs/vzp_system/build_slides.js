@@ -96,8 +96,8 @@ pres.addSection({ title: "Systém" });
   const yC = yT + hT + 0.55, hC = 6.95 - yC;
   const wSide = 3.35, xL = M, xR = W - M - wSide, xMid = xL + wSide + 0.75, wMid = xR - 0.75 - xMid;
   card(s, xL, yC, wSide, hC, "klient", "Komunikace VZP ↔ klient", [
-    "**Ven:** dopis, e-mail, push notifikace, SMS, telefonát / navigace, předrezervovaný termín",
-    "**Zpět:** odezva, rezervace termínu, odhlášení a preference kanálu",
+    "**Ven:** dopis, e-mail, aplikace VZP (push, rezervace), SMS, telefonát / navigace, předrezervovaný termín",
+    "**Zpět:** odezva, rezervace termínu, odhlášení, preference kanálu, odpovědi v dotaznících",
   ], { size: 14 });
   card(s, xR, yC, wSide, hC, "poskytovatele", "Komunikace VZP ↔ poskytovatelé", [
     "**Ven:** seznamy klientů pro praktiky a specialisty, objednání u poskytovatele",
@@ -146,7 +146,58 @@ pres.addSection({ title: "Systém" });
     + "s trvalou kontrolní skupinou; jejich výsledky se vracejí do modelu jako aktualizované odhady účinků.");
 }
 
-// ---------- 3 · explainable attendance model ----------
+// ---------- 3 · VZP app ----------
+{
+  const s = slide("Aplikace VZP: přímý kanál a zpětná vazba", "Systém");
+  const wL = 7.05, xR = M + wL + 0.35, wR = W - M - xR, yB = 5.75;
+  text(s, [r("Co aplikace doručí", { bold: true, fontSize: 16, color: C.accent1 })], M, TOP, wL, 0.35, "dorucit_nadpis");
+  const items = [
+    ["Rezervace jedním klepnutím", "předrezervovaný termín: potvrdit, přesunout, uvolnit; uvolněné termíny se vrací poskytovateli"],
+    ["Dotazník bariér → cílený krok", "„Co vám brání?“ → navigace telefonem, večerní termín, doprava, vysvětlení „bez žádanky“"],
+    ["Přehled prevence", "vše, co klienta čeká: screeningy, preventivní prohlídky, očkování na jednom místě"],
+    ["Připomínky a obsah", "stejné zprávy jako SMS a dopis, zdarma, s rezervací na jedno klepnutí a variantami k testování"],
+  ];
+  const cw = (wL - 0.25) / 2, ch = (yB - 0.25 - (TOP + 0.5) - 0.25) / 2;
+  items.forEach(([h, b], i) => {
+    const x = M + (i % 2) * (cw + 0.25), y = TOP + 0.5 + Math.floor(i / 2) * (ch + 0.25);
+    box(s, x, y, cw, ch, `aplikace_${i + 1}`);
+    s.addShape(pres.shapes.OVAL, { x: x + 0.2, y: y + 0.2, w: 0.5, h: 0.5, fill: { color: C.accent2 }, line: { type: "none" },
+      objectName: `aplikace_${i + 1}_cislo` });
+    text(s, [r(String(i + 1), { bold: true, fontSize: 16, color: C.background1, fontFace: THEME.headFontFace })],
+      x + 0.2, y + 0.2, 0.5, 0.5, `aplikace_${i + 1}_cislo_text`, { align: "center", valign: "middle" });
+    text(s, [r(h, { bold: true, fontSize: 15, color: C.accent1, breakLine: true, paraSpaceAfter: 4 }),
+      r(b, { fontSize: 13, color: C.text1 })], x + 0.85, y + 0.2, cw - 1.05, ch - 0.35, `aplikace_${i + 1}_text`);
+  });
+  // what comes back
+  box(s, xR, TOP, wR, yB - 0.25 - TOP, "zpet", C.accent1);
+  text(s, [r("Co se vrací do VZP", { bold: true, fontSize: 16, color: C.background1, breakLine: true, paraSpaceAfter: 8 }),
+    ...paras([
+      "**Důvody, proč klient nepřišel:** znaky pro segmentaci a model upliftu",
+      "**Zkušenost po vyšetření:** kvalita poskytovatelů, návyk",
+      "**Dosažitelnost kanálů:** komu co funguje, omezení pro optimalizaci",
+      "**Platforma pro pokusy:** levná randomizace, zaznamenané přiřazení, signály za dny",
+    ], { fontSize: 15, color: C.background1 }, { bullet: { indent: 14 }, paraSpaceAfter: 14 })],
+    xR + 0.25, TOP + 0.2, wR - 0.5, yB - 0.25 - TOP - 0.35, "zpet_text");
+  // caveats
+  box(s, M, yB, CW, 6.95 - yB, "pozor", C.background2);
+  text(s, [r("Pozor: ", { bold: true, fontSize: 13.5, color: C.accent1 }),
+    r("uživatelé aplikace jsou výběr: chodí častěji a nejtěžší segmenty zastihne aplikace nejméně, takže výsledky "
+      + "platí jen pro ně a dopis, SMS ani telefon nenahradí. Krátké a řídké dotazníky (únava, zkreslení odpovědí), souhlas "
+      + "s využitím odpovědí (GDPR). Výsledek měřit vykázaným výkonem, ne kliknutím.", { fontSize: 13, color: C.text1 })],
+    M + 0.25, yB + 0.15, CW - 0.5, 6.95 - yB - 0.3, "pozor_text", { valign: "middle" });
+
+  s.addNotes("Aplikace VZP má mezi klienty dobrý dosah (zhruba 700 tisíc uživatelů; aktivita a podíl v cílových skupinách zatím "
+    + "nejsou známé) a VZP ji chce rozvíjet jako přímý kanál včetně zpětné vazby. Samotná push notifikace je slabá intervence: "
+    + "ve studii ze Singapuru na ni kliklo jen 4 % adresátek. Hodnota aplikace je jinde. Zaprvé jako levný kanál pro intervence, které "
+    + "fungují: předrezervovaný termín, který klient jedním klepnutím potvrdí, přesune nebo uvolní (uvolněné termíny se vracejí "
+    + "poskytovateli, což snižuje hlavní náklad předrezervace); dotazník bariér, podle jehož odpovědi následuje cílený krok "
+    + "(navigace telefonem jen tam, kde ji telefonát vyřeší); přehled všech preventivních programů na jednom místě; levné "
+    + "varianty zpráv. Zadruhé jako zdroj zpětné vazby: důvody neúčasti jako znaky pro model upliftu, zkušenost po vyšetření "
+    + "pro sledování kvality, dosažitelnost kanálů a platforma pro průběžné randomizované pokusy. Pozor na samovýběr uživatelů, "
+    + "zkreslení a únavu z dotazníků a na souhlas s využitím odpovědí.");
+}
+
+// ---------- 4 · explainable attendance model ----------
 pres.addSection({ title: "Modely" });
 {
   const s = slide("Model pravděpodobnosti účasti: vysvětlitelný (EBM)", "Modely");
@@ -208,7 +259,7 @@ pres.addSection({ title: "Modely" });
     + "Křivky na snímku jsou ilustrativní, ne z dat.");
 }
 
-// ---------- 4 · uplift model ----------
+// ---------- 5 · uplift model ----------
 {
   const s = slide("Model upliftu: bayesovský, s modelem účasti jako priorem", "Modely");
   const y1 = TOP, hA = 1.3, y2 = y1 + hA + 0.25, wA = 3.0;
@@ -268,13 +319,13 @@ pres.addSection({ title: "Modely" });
     + "(6) Rizika: negativní uplift, pořadí a kombinace kanálů (později dynamický režim / kontextový bandit), posun v čase, férovost.");
 }
 
-// ---------- 5 · roadmap ----------
+// ---------- 6 · roadmap ----------
 pres.addSection({ title: "Postup" });
 {
   const s = slide("Postup zavedení", "Postup", "Tmavy");
   const steps = [
     ["Priory", "model účasti (EBM) a účinky intervencí z literatury"],
-    ["Pilotní pokus", "víceramenná RCT po segmentech, zaznamenané pravděpodobnosti přiřazení"],
+    ["Pilotní pokus", "víceramenná RCT po segmentech, levně i v aplikaci VZP, zaznamenané pravděpodobnosti přiřazení"],
     ["První model upliftu", "bayesovský posterior: kdo na co reaguje"],
     ["Cílení s průzkumem", "optimalizace podle zdravotní hodnoty, ~10 % průzkum, trvalá kontrolní skupina"],
     ["Učení dokola", "pravidelné přeučení, vyhodnocení v monitoringu, rozhodnutí o rozšíření"],

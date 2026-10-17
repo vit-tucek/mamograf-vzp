@@ -1,6 +1,7 @@
-"""Builds pitch_3min.pptx: the 3-minute final pitch (6 slides), on the v41 deck's own template.
+"""Builds the 3-minute final pitch (6 slides) on the v41 deck's own template, in two variants:
 
-    python docs/vzp_pitch/build_pitch.py        (needs python-pptx)
+    python docs/vzp_pitch/build_pitch.py        → pitch_3min.pptx        (7 segments A–G)
+    python docs/vzp_pitch/build_pitch.py 11     → pitch_3min_11seg.pptx  (11 segments, A–G split further)
 
 The template is docs/sources/Mamo_graf_VZP_v41.pptx: its slides are dropped and new ones are added
 from its layouts "TITUL" and "OBSAH", so the pitch keeps the W&P look (Poppins, navy palette, logo,
@@ -12,10 +13,13 @@ footers). Numbers and where they come from:
   D preventive gynaecology (24 months), E other prevention (other screening 36 m., dentist or GP check-up
   24 m.), F at least one healthcare contact in 12 months, G none. Score = segment attendance 2020–2023,
   AUC on 2024 = 0,789. Logistic regression AUC 0,83 is the team's model from the v41 deck.
+- 11 segments: config/segments_vzp_v2.yaml and notebooks/vzp_segmentation_final.ipynb (2024 table in
+  outputs/vzp_segmentation_final/segmenty_2024.csv); AUC of the segment score on 2024 = 0,807.
 - Effect ranges: docs/interventions.md. Extra mammographies, QALY and costs: see docs/vzp_pitch/build_slides.js.
 """
 import copy
 import re
+import sys
 from pathlib import Path
 
 from pptx import Presentation
@@ -29,7 +33,9 @@ from pptx.util import Inches, Pt
 
 HERE = Path(__file__).parent
 TEMPLATE = HERE.parent / "sources" / "Mamo_graf_VZP_v41.pptx"
-OUT = HERE / "pitch_3min.pptx"
+SEG = int(sys.argv[1]) if len(sys.argv) > 1 else 7
+assert SEG in (7, 11)
+OUT = HERE / ("pitch_3min.pptx" if SEG == 7 else "pitch_3min_11seg.pptx")
 
 NAVY, BLUE, LIGHT, CORAL, LILAC = "003B7A", "3D7CC9", "A9C6EA", "D27869", "7A78C3"
 INK, BODY, MUTED, LINE, PALE, WHITE = "230F3C", "4A4458", "8A8597", "DEDCEC", "F7F6FB", "FFFFFF"
@@ -255,57 +261,134 @@ set_notes(s, (
     "A s věkem mizí preventivní gynekologie, hlavní cesta k mamografu: ze 63 na 17 procent."))
 
 # ---------------------------------------------------------------- 3 · where the segments come from (35 s)
-s = content_slide(prs, "ODKUD SEGMENTY", "Tři otázky nad daty VZP rozdělí ženy do sedmi skupin",
-                  "Pravidla stojí jen na polích, která VZP poskytla. Pořadí otázek je priorita: žena patří do první skupiny, "
-                  "jejíž podmínka platí.")
-badges(s, ["Data VZP"])
-qs = [("1 · Historie screeningu", ["**A** screening před méně než 24 měs.", "**B** první pozvánka", "**C** screening v posledních 5 letech"]),
-      ("2 · Prevence", ["**D** preventivní gynekologie", "**E** jiná prevence: zubař, praktik, jiný screening"]),
-      ("3 · Kontakt se zdravotnictvím", ["**F** aspoň jedna návštěva lékaře za rok", "**G** žádný kontakt"])]
-y = 2.25
-for q, items in qs:
-    h = 0.55 + 0.3 * len(items)
-    box(s, X0, y, 4.35, h, fill=PALE)
-    text(s, X0 + 0.2, y + 0.14, 4.0, 0.3, q, size=12, color=NAVY, bold=True)
-    text(s, X0 + 0.2, y + 0.5, 4.0, h - 0.55, items, size=11, color=INK, space_after=3)
-    y += h + 0.2
-table(s, 5.45, 2.25, 7.03, [3.13, 1.3, 1.3, 1.3], [
-    ["Segment", "Ženy 2024", "Účast 12 měs.", "Nepřišlo"],
-    ["A nedávno vyšetřená", "7 600", "2 %", "7 418"],
-    ["B první pozvánka", "37 460", "55 %", "16 820"],
-    ["C vypadlá z rytmu", "28 577", "33 %", "19 111"],
-    ["D bez screeningu, gynekolog", "51 047", "21 %", "40 573"],
-    ["E bez screeningu, jiná prevence", "89 351", "8 %", "82 559"],
-    ["F jen léčebná péče", "28 368", "5 %", "26 977"],
-    ["G mimo péči", "14 063", "2 %", "13 743"],
-    ["Celkem", "256 466", "19 %", "207 201"],
-], row_h=0.34, bold_rows=(8,))
-box(s, 5.45, 5.5, 7.03, 0.95, fill=WHITE)
-text(s, 5.65, 5.6, 6.65, 0.8, [
-    "**Ověřeno na novém roce:** pravidla z let 2020–2023, test na 2024. Samotné segmenty seřadí ženy s AUC 0,79, "
-    "celý vysvětlitelný model 0,83.",
-    "Segmenty jsou stabilní pět let; jemnější verze s 11 segmenty slouží k cílení."], size=10.5, color=BODY, space_after=3)
-source(s, "Zdroj: data VZP pro Rakathon 2026, pozvánky 2020–2024; naše analýza")
-set_notes(s, (
-    "35 s. Odkud segmenty? Ze tří otázek nad daty, která VZP poskytla. Zaprvé historie screeningu: nedávno vyšetřená, první "
-    "pozvánka, nebo vypadla z rytmu. Zadruhé, chodí na jinou prevenci, ke gynekologovi nebo k zubaři a praktikovi? Zatřetí, je "
-    "vůbec v kontaktu se zdravotnictvím? Tak vznikne sedm skupin s účastí od 2 do 55 procent. Pravidla jsme stanovili na letech "
-    "2020 až 2023 a otestovali na roce 2024: segmenty seřadí ženy skoro stejně dobře jako celý model. "
-    "(AUC segmentů 0,789 je přepočet z dat; AUC 0,83 logistické regrese je model týmu z prezentace v41.)"))
+if SEG == 7:
+    s = content_slide(prs, "ODKUD SEGMENTY", "Tři otázky nad daty VZP rozdělí ženy do sedmi skupin",
+                      "Pravidla stojí jen na polích, která VZP poskytla. Pořadí otázek je priorita: žena patří do první skupiny, "
+                      "jejíž podmínka platí.")
+    badges(s, ["Data VZP"])
+    qs = [("1 · Historie screeningu", ["**A** screening před méně než 24 měs.", "**B** první pozvánka", "**C** screening v posledních 5 letech"]),
+          ("2 · Prevence", ["**D** preventivní gynekologie", "**E** jiná prevence: zubař, praktik, jiný screening"]),
+          ("3 · Kontakt se zdravotnictvím", ["**F** aspoň jedna návštěva lékaře za rok", "**G** žádný kontakt"])]
+    y = 2.25
+    for q, items in qs:
+        h = 0.55 + 0.3 * len(items)
+        box(s, X0, y, 4.35, h, fill=PALE)
+        text(s, X0 + 0.2, y + 0.14, 4.0, 0.3, q, size=12, color=NAVY, bold=True)
+        text(s, X0 + 0.2, y + 0.5, 4.0, h - 0.55, items, size=11, color=INK, space_after=3)
+        y += h + 0.2
+    table(s, 5.45, 2.25, 7.03, [3.13, 1.3, 1.3, 1.3], [
+        ["Segment", "Ženy 2024", "Účast 12 měs.", "Nepřišlo"],
+        ["A nedávno vyšetřená", "7 600", "2 %", "7 418"],
+        ["B první pozvánka", "37 460", "55 %", "16 820"],
+        ["C vypadlá z rytmu", "28 577", "33 %", "19 111"],
+        ["D bez screeningu, gynekolog", "51 047", "21 %", "40 573"],
+        ["E bez screeningu, jiná prevence", "89 351", "8 %", "82 559"],
+        ["F jen léčebná péče", "28 368", "5 %", "26 977"],
+        ["G mimo péči", "14 063", "2 %", "13 743"],
+        ["Celkem", "256 466", "19 %", "207 201"],
+    ], row_h=0.34, bold_rows=(8,))
+    box(s, 5.45, 5.5, 7.03, 0.95, fill=WHITE)
+    text(s, 5.65, 5.6, 6.65, 0.8, [
+        "**Ověřeno na novém roce:** pravidla z let 2020–2023, test na 2024. Samotné segmenty seřadí ženy s AUC 0,79, "
+        "celý vysvětlitelný model 0,83.",
+        "Segmenty jsou stabilní pět let; jemnější verze s 11 segmenty slouží k cílení."], size=10.5, color=BODY, space_after=3)
+    source(s, "Zdroj: data VZP pro Rakathon 2026, pozvánky 2020–2024; naše analýza")
+    set_notes(s, (
+        "35 s. Odkud segmenty? Ze tří otázek nad daty, která VZP poskytla. Zaprvé historie screeningu: nedávno vyšetřená, první "
+        "pozvánka, nebo vypadla z rytmu. Zadruhé, chodí na jinou prevenci, ke gynekologovi nebo k zubaři a praktikovi? Zatřetí, je "
+        "vůbec v kontaktu se zdravotnictvím? Tak vznikne sedm skupin s účastí od 2 do 55 procent. Pravidla jsme stanovili na letech "
+        "2020 až 2023 a otestovali na roce 2024: segmenty seřadí ženy skoro stejně dobře jako celý model. "
+        "(AUC segmentů 0,789 je přepočet z dat; AUC 0,83 logistické regrese je model týmu z prezentace v41.)"))
+
+else:
+    s = content_slide(prs, "ODKUD SEGMENTY", "Šest otázek nad daty VZP rozdělí ženy do jedenácti skupin",
+                      "Pravidla stojí jen na polích, která VZP poskytla. Otázky jdou shora dolů; žena patří do první skupiny, "
+                      "na kterou odpoví „ano“.")
+    badges(s, ["Data VZP"])
+    def chip_color(u):            # účast 2024: vysoká modře, střední světle, nízká korálově
+        return (NAVY, WHITE) if u >= 0.3 else ((LIGHT, INK) if u >= 0.1 else (CORAL, WHITE))
+    rows = [("Screening před < 24 měs.?", [("A", "dopis se minul", 0.024)]),
+            ("První pozvánka?", [("B1", "< 6 kontaktů za rok", 0.357), ("B2", "v kontaktu", 0.596)]),
+            ("Screening v posledních 5 letech?", [("C1", "≤ 48 měs.", 0.388), ("C2", "4–5+ let", 0.257)]),
+            ("Preventivní gynekologie?", [("D1", "≤ 6 pozvánek", 0.271), ("D2", "7+ pozvánek", 0.103)]),
+            ("Jiná prevence (zubař, praktik)?", [("E1", "≤ 6 pozvánek", 0.127), ("E2", "7+ pozvánek", 0.051)]),
+            ("≥ 6 kontaktů se zdravotnictvím?", [("F", "ano: v kontaktu", 0.052), ("G", "ne: odpojená", 0.031)])]
+    rh, rg, y = 0.56, 0.17, 2.25
+    for i, (q, chips) in enumerate(rows):
+        box(s, X0, y, 2.55, rh, fill=PALE)
+        text(s, X0 + 0.12, y, 2.35, rh, q, size=10, color=NAVY, bold=True, anchor=MSO_ANCHOR.MIDDLE)
+        text(s, X0 + 2.6, y + rh / 2 - 0.22, 0.4, 0.2, "ano", size=8.5, color="1B7837", bold=True, align=PP_ALIGN.CENTER)
+        arrow(s, X0 + 2.62, y + rh / 2 - 0.05, 0.34)
+        cx = X0 + 3.02
+        for code, lbl, u in chips:
+            fill, fg = chip_color(u)
+            box(s, cx, y + 0.06, 1.18, rh - 0.12, fill=fill, line=None, radius=0.15)
+            text(s, cx + 0.06, y + 0.06, 1.06, rh - 0.12, [f"**{code}** · {lbl}"], size=8.5, color=fg,
+                 align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+            cx += 1.24
+        if i < len(rows) - 1:
+            ln = plain(s.shapes.add_connector(1, Inches(X0 + 0.4), Inches(y + rh), Inches(X0 + 0.4), Inches(y + rh + rg)))
+            ln.line.color.rgb = rgb(MUTED)
+            ln.line.width = Pt(1)
+            text(s, X0 + 0.47, y + rh + 0.005, 0.3, rg, "ne", size=8, color="B2182B", bold=True, anchor=MSO_ANCHOR.MIDDLE)
+        y += rh + rg
+    text(s, X0, y + 0.02, 5.4, 0.25, "barva: účast 2024 ≥ 30 % / 10–30 % / < 10 %", size=8.5, color=MUTED)
+    table(s, 6.4, 2.25, 6.08, [2.98, 1.0, 1.0, 1.1], [
+        ["Segment", "Ženy 2024", "Účast", "Nepřišlo"],
+        ["A dopis se minul", "7 600", "2 %", "7 418"],
+        ["B1 1. pozvánka, málo kontaktů", "7 127", "36 %", "4 580"],
+        ["B2 1. pozvánka, v kontaktu", "30 333", "60 %", "12 240"],
+        ["C1 vypadlá 3–4 roky", "16 167", "39 %", "9 892"],
+        ["C2 vypadlá 4–5+ let", "12 410", "26 %", "9 219"],
+        ["D1 gynekolog, zvaná málokrát", "31 098", "27 %", "22 679"],
+        ["D2 gynekolog, nereaguje", "19 949", "10 %", "17 894"],
+        ["E1 jiná prevence, zvaná málokrát", "29 487", "13 %", "25 734"],
+        ["E2 jiná prevence, nereaguje", "59 864", "5 %", "56 825"],
+        ["F bez prevence, v kontaktu", "18 102", "5 %", "17 155"],
+        ["G odpojená", "24 329", "3 %", "23 565"],
+        ["Celkem", "256 466", "19 %", "207 201"],
+    ], row_h=0.29, size=9.5, bold_rows=(12,))
+    box(s, 6.4, 6.08, 6.08, 0.62, fill=WHITE)
+    text(s, 6.55, 6.13, 5.8, 0.52,
+         "**Ověřeno na novém roce:** pravidla z let 2020–2023, test na 2024. Segmenty seřadí ženy s AUC 0,81, "
+         "celý vysvětlitelný model 0,83.", size=9.5, color=BODY)
+    source(s, "Zdroj: data VZP pro Rakathon 2026, pozvánky 2020–2024; config/segments_vzp_v2.yaml; naše analýza")
+    set_notes(s, (
+        "35 s. Odkud segmenty? Z šesti otázek nad daty, která VZP poskytla, kladených shora dolů. Nejdřív historie screeningu: "
+        "nedávno vyšetřená, první pozvánka, vypadla z rytmu. Pak prevence: chodí ke gynekologovi, nebo k zubaři a praktikovi? "
+        "U nich rozhoduje, kolik pozvánek už ignorovala. Nakonec, je vůbec v kontaktu se zdravotnictvím? Vznikne jedenáct "
+        "skupin s účastí od 2 do 60 procent. Pravidla jsme stanovili na letech 2020 až 2023 a otestovali na roce 2024: "
+        "segmenty seřadí ženy skoro stejně dobře jako celý model. "
+        "(AUC segmentů 0,807 z notebooku vzp_segmentation_final; AUC 0,83 logistické regrese je model týmu z prezentace v41.)"))
 
 # ---------------------------------------------------------------- 4 · how we use them (35 s)
 s = content_slide(prs, "JAK SEGMENTY POUŽÍVÁME", "Každý segment dostane svůj kanál a opatření",
                   "Opatření vybíráme z literatury podle toho, co ženě v segmentu brání. Z e-commerce víme, jak je doručit a změřit.")
 badges(s, ["Literatura", "E-commerce"])
-table(s, X0, 2.25, 7.65, [2.1, 3.95, 1.6], [
-    ["Segment", "Kanál a opatření", "Účinek (p. b.)"],
-    ["A nedávno vyšetřená", "nezvat, ověřit výkony těsně před odesláním", "úspora 7 600 dopisů"],
-    ["B první pozvánka", "pevný termín v pozvánce + SMS připomínka", "**+10 až +19**"],
-    ["C vypadlá z rytmu", "dřívější připomínka s termínem (25.–36. měsíc)", "+2 až +6"],
-    ["D gynekolog", "seznam žen bez mamografie pro gynekologa, objednání v ordinaci", "+2 až +6"],
-    ["E jiná prevence", "praktik jako nový kanál: seznam žen, upozornění při prohlídce", "+2 až +6"],
-    ["F, G", "zatím ne: nízká účast a nejistý účinek", "–"],
-], row_h=0.58, highlight_col=1)
+if SEG == 7:
+    table(s, X0, 2.25, 7.65, [2.1, 3.95, 1.6], [
+        ["Segment", "Kanál a opatření", "Účinek (p. b.)"],
+        ["A nedávno vyšetřená", "nezvat, ověřit výkony těsně před odesláním", "úspora 7 600 dopisů"],
+        ["B první pozvánka", "pevný termín v pozvánce + SMS připomínka", "**+10 až +19**"],
+        ["C vypadlá z rytmu", "pevný termín dřív: ve 25.–36. měsíci místo po 3–5 letech", "**+10 až +19**"],
+        ["D gynekolog", "seznam žen bez mamografie pro gynekologa, objednání v ordinaci", "+2 až +6"],
+        ["E jiná prevence", "praktik jako nový kanál: seznam žen, upozornění při prohlídce", "+2 až +6"],
+        ["F, G", "zatím ne: nízká účast a nejistý účinek", "–"],
+    ], row_h=0.58, highlight_col=1)
+else:
+    table(s, X0, 2.25, 7.65, [2.25, 4.0, 1.4], [
+        ["Segment", "Kanál a opatření", "Účinek (p. b.)"],
+        ["A dopis se minul", "nezvat, ověřit výkony těsně před odesláním", "úspora 7 600"],
+        ["B1 1. pozvánka, málo kontaktů", "pevný termín + telefonát navíc k dopisu", "**+10 až +19**"],
+        ["B2 1. pozvánka, v kontaktu", "pevný termín v pozvánce + SMS", "**+10 až +19**"],
+        ["C1, C2 vypadlé", "pevný termín dřív: ve 25.–36. měsíci", "**+10 až +19**"],
+        ["D1 gynekolog, zvaná málokrát", "seznam žen bez mamografie pro gynekologa", "+2 až +6"],
+        ["D2 gynekolog, nereaguje", "objednání přímo v ordinaci místo dopisu", "+2 až +6"],
+        ["E1 jiná prevence, zvaná málokrát", "praktik a zubař: seznam žen, upozornění", "+2 až +6"],
+        ["E2 jiná prevence, nereaguje", "praktik místo dopisu; test vynechání dopisu", "+2 až +6"],
+        ["F bez prevence, v kontaktu", "upozornění pro ošetřující lékaře (EZ karta)", "+1 až +5"],
+        ["G odpojená", "zatím ne: nejdřív ověřit kontakt", "–"],
+    ], row_h=0.38, size=9.5, highlight_col=1)
 box(s, 8.75, 2.25, 3.73, 4.06, fill=PALE)
 text(s, 8.95, 2.4, 3.35, 0.35, "Co přinášíme z e-commerce", size=13, color=CORAL, bold=True)
 text(s, 8.95, 2.85, 3.35, 3.35, [
@@ -317,7 +400,7 @@ text(s, 8.95, 2.85, 3.35, 3.35, [
 source(s, "Zdroj: rozpětí účinku z RCT a metaanalýz (docs/interventions.md), přenos do ČR je náš úsudek; data VZP 2024")
 set_notes(s, (
     "35 s. Jak je používáme? Každý segment dostane kanál, kterým ho zastihneme, a opatření, které podle studií funguje. "
-    "Prvním pozvaným pevný termín místo otevřené pozvánky: v anglických studiích plus deset až devatenáct bodů. Ženám "
+    "Prvním pozvaným a vypadlým pevný termín místo otevřené pozvánky: v anglických studiích plus deset až devatenáct bodů. Ženám "
     "u gynekologa nebo praktika oslovení přes lékaře. Nedávno vyšetřeným dopis neposíláme vůbec. Z e-commerce přinášíme "
     "způsob práce: automatické kaskády zpráv, A/B test s kontrolní skupinou u každé změny a měření skutečného přírůstku, "
     "ne kliknutí."))
@@ -326,7 +409,9 @@ set_notes(s, (
 s = content_slide(prs, "DOPAD", "Dopad počítáme ve třech krocích a ověříme ho experimentem",
                   "Každý krok má svůj zdroj: kolik žen je v segmentu, o kolik víc jich podle studií přijde a co to znamená "
                   "pro zdraví a náklady.")
-steps = [("Kolik žen", "206 tis.", "pozvaných ročně v segmentech B–E: B+C 66 tis., D+E 140 tis.", "Data VZP", NAVY),
+KOLIK = ("pozvaných ročně v segmentech B–E: B+C 66 tis., D+E 140 tis." if SEG == 7 else
+         "pozvaných ročně v B1–E2: 1. pozvánky a vypadlé 66 tis., gynekolog a jiná prevence 140 tis.")
+steps = [("Kolik žen", "206 tis.", KOLIK, "Data VZP", NAVY),
          ("O kolik víc přijde", "+2–19 p. b.", "rozpětí účinku opatření z randomizovaných studií a metaanalýz", "Literatura", BLUE),
          ("Mamografie navíc", "9–21 tis.", "ročně: dolní a horní mez rozpětí účinku", None, NAVY),
          ("Zdraví a náklady", "36–80 QALY", "a 5–11 odvrácených úmrtí ročně; 0,26 mil. Kč za QALY (práh SÚKL 1,2 mil.)", "Literatura", CORAL)]
@@ -367,7 +452,7 @@ set_notes(s, (
 s = prs.slides.add_slide(LAYOUT["TITUL"])
 text(s, X0, 1.25, 7.8, 0.8, "Co přinášíme VZP", size=34, color=WHITE)
 cols = [("Máme", ["1,34 mil. pozvánek a okresní data ČR", "vysvětlitelný model účasti (AUC 0,83)",
-                  "7 segmentů z dat, ověřených na roce 2024", "opatření z literatury pro každý segment"]),
+                  f"{SEG} segmentů z dat, ověřených na roce 2024", "opatření z literatury pro každý segment"]),
         ("Nabízíme", ["pilot v segmentech B–E s randomizací", "pevný termín + SMS a lékař jako kanál",
                       "Moje VZP: rezervace, dotazník bariér", "model, segmenty i kód předáme"]),
         ("Přineseme", ["9–21 tis. mamografií navíc ročně", "36–80 QALY a 5–11 odvrácených úmrtí ročně",
@@ -380,7 +465,7 @@ for i, (h, items) in enumerate(cols):
 text(s, X0, 5.55, 10.0, 0.75, ["Jakub Weiner", "jakub@weiner.cz · +420 602 307 893 · www.weinerpartners.cz"], size=13,
      color=WHITE, bold=True)
 set_notes(s, (
-    "30 s. Shrnuto: máme model, sedm segmentů a opatření pro každý z nich. Nabízíme VZP pilot s randomizací v segmentech B až E "
+    "30 s. Shrnuto: máme model, " + ("sedm" if SEG == 7 else "jedenáct") + " segmentů a opatření pro každý z nich. Nabízíme VZP pilot s randomizací v segmentech B až E "
     "v rámci řízeného vstupu inovací; model, segmenty i návrh experimentu předáme včetně kódu. Výsledkem může být až dvacet "
     "tisíc mamografií ročně navíc a desítky let života ve zdraví. Děkujeme."))
 

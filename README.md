@@ -46,8 +46,9 @@ ukazují jen agregáty.
 - [`docs/vzp_segmentace/slides.pptx`](docs/vzp_segmentace/slides.pptx): segmentace pozvaných žen (zdroj `slides.md`);
 - [`docs/vzp_system/system.pptx`](docs/vzp_system/system.pptx): koncept systému cílené prevence,
   vysvětlitelný model účasti (EBM) a bayesovský model upliftu.
-- [`docs/vzp_pitch/pitch_3min.pptx`](docs/vzp_pitch/pitch_3min.pptx): tříminutový pitch na šabloně W&P (generuje
-  `build_pitch.py` v Pythonu); závěrečný slajd zvlášť v [`zaver.pptx`](docs/vzp_pitch/zaver.pptx).
+- [`docs/vzp_pitch/pitch_3min.pptx`](docs/vzp_pitch/pitch_3min.pptx): tříminutový pitch na šabloně W&P se 7 segmenty,
+  [`pitch_3min_11seg.pptx`](docs/vzp_pitch/pitch_3min_11seg.pptx) stejný pitch s 11 segmenty (generuje `build_pitch.py`,
+  resp. `build_pitch.py 11`); závěrečný slajd zvlášť v [`zaver.pptx`](docs/vzp_pitch/zaver.pptx).
 
 ## Okresy ČR
 

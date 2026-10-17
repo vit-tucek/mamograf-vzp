@@ -9,7 +9,7 @@ outputs/
 # zdrojové sady, které notebooky ke spuštění nepotřebují, leží jen lokálně v sources/
 data/*
 !data/*.zip
-sources/
+/sources/
 
 # data VZP jsou v gitu jen zabalená (Rakhaton2026.csv.gz); rozbalená kopie ne
 data_vzp/*.csv

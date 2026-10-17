@@ -46,6 +46,8 @@ ukazují jen agregáty.
 - [`docs/vzp_segmentace/slides.pptx`](docs/vzp_segmentace/slides.pptx): segmentace pozvaných žen (zdroj `slides.md`);
 - [`docs/vzp_system/system.pptx`](docs/vzp_system/system.pptx): koncept systému cílené prevence,
   vysvětlitelný model účasti (EBM) a bayesovský model upliftu.
+- [`docs/vzp_pitch/pitch_3min.pptx`](docs/vzp_pitch/pitch_3min.pptx): tříminutový pitch na šabloně W&P (generuje
+  `build_pitch.py` v Pythonu); závěrečný slajd zvlášť v [`zaver.pptx`](docs/vzp_pitch/zaver.pptx).
 
 ## Okresy ČR
 
@@ -232,7 +234,8 @@ node docs/vzp_system/build_slides.js
 | `notebooks/mamograf_podskupiny.ipynb` | podskupiny, ve kterých se skrývá účinek | ano |
 | `config/segments_vzp*.yaml` | pravidla akčních segmentů (verze 1 a 2) | ano |
 | `utils/` | načtení dat (`nacteni.py`), společné analytické kroky (`analyza.py`), vzhled grafů (`vzhled.py`), přepočet agregátů (`priprava_dat.py`), velikost vzorku (`power.py`) | ano |
-| `docs/vzp_segmentace/`, `docs/vzp_system/` | prezentace (`.md`, `.pptx`, grafy a generátory) | ano |
+| `docs/vzp_segmentace/`, `docs/vzp_system/`, `docs/vzp_pitch/` | prezentace (`.md`, `.pptx`, grafy a generátory), tříminutový pitch | ano |
+| `docs/sources/` | prezentace týmu v41 (57 slajdů, šablona pitche) a její textový výpis | ano |
 | `docs/ZDROJE_DAT.md` | původ a zpracování veřejných dat | ano |
 | `docs/interventions.md` | intervence seřazené podle očekávaného účinku: proč fungují, důkazy, jak je otestovat | ano |
 | `docs/ZJISTENI.md` | souhrn zjištění k 15. 10.: okresní data, literatura, ekonomika, framework na syntetice | ano |

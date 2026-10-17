@@ -16,3 +16,5 @@ catboost>=1.2
 shap>=0.46
 matplotlib>=3.8
 pyyaml>=6.0
+# prezentace (docs/vzp_pitch/build_pitch.py)
+python-pptx>=1.0

@@ -39,6 +39,25 @@ Tři rozměry: **historie screeningu**, **kontakt se zdravotnictvím a prevencí
 
 ---
 
+## Výkon segmentačního modelu podrobněji
+
+![Výkon segmentačního modelu](segmenty_vykon.png)
+
+| 2024, do 12 měsíců | 11 segmentů | model hazardu |
+|---|---|---|
+| AUROC (95% interval) | **0,807** (±0,002) | 0,837 (±0,002) |
+| AUPRC (bez modelu 0,192) | 0,469 | 0,578 |
+| zlepšení Brier score proti „bez modelu“ | 22 % | 28 % |
+| kalibrační sklon (ideál 1) | 0,99 | 0,98 |
+| kalibrace v celku | −1,4 p. b. | −0,6 p. b. |
+| přišlé v horních 20 % (lift) | 53 % (2,6×) | 58 % (2,9×) |
+| nepřišlé mezi 30 % s nejnižší předpovědí (bez modelu 81 %) | **96 %** | 97 % |
+
+- Segmenty **podceňují účast o 1,4 p. b.**, protože účast mezi lety roste; rozpětí předpovědí sedí (sklon 0,99).
+- Pro **kampaň na nepřišlé segmenty stačí**: model hazardu je lepší hlavně u žen, které přijdou samy.
+
+---
+
 ## Kde jsou ženy, které nepřišly (2024: 207 tisíc)
 
 ![Mapa segmentů](segmenty_mapa.png)
@@ -126,6 +145,21 @@ Zpětná hrana z „nereaguje“ chybí: co se nezíská brzy, už se skoro nez�
 | 7 | Vypadlá 3–4 roky (16 200) | Připomínka s konkrétním termínem (implementation intention) | 39 % | 2,2 p. b. |
 
 **Společné výstupy:** účast do 3 / 6 / 12 měsíců, **sestup do horšího segmentu** při další pozvánce, náklad na získanou mamografii. Randomizace uvnitř segmentu s rozvrstvením podle územního pracoviště, analýza ITT.
+
+---
+
+## Návrhy experimentů v aplikaci VZP
+
+| # | Zásah (jen uživatelky aplikace) | Cílové ženy za rok | Výchozí účast | MDE* při 10 / 20 / 30 % v aplikaci |
+|---|---|---|---|---|
+| A1 | Rezervace v aplikaci: předrezervovaný termín, potvrzení jedním klepnutím (1. pozvánky, vypadlé 3–4 roky) | 53 600 | 34,5 % (6M) | 3,7 / 2,6 / 2,1 p. b. |
+| A2 | Push vs SMS × odkaz na rezervaci, faktoriál 2 × 2 (všechny segmenty kromě zkříženého dopisu) | 248 900 | 19,7 % | 1,4 / 1,0 / 0,8 p. b. |
+| A3 | Dotazník bariér → cílený další krok, ženy bez účasti do 3 měsíců („zvaná málokrát“, vypadlé 4–5+ let) | 67 600 | 14,8 % (3.–12. měsíc) | 2,5 / 1,8 / 1,4 p. b. |
+
+\* nejmenší účinek, který pokus spolehlivě odhalí, když polovina uživatelek aplikace v cílových segmentech za rok dostane zásah a polovina zůstane kontrolou (α = 0,05, síla 80 %). Podíl uživatelek aplikace mezi pozvanými ženami zatím neznáme.
+
+- Samotná push je slabá (0 až +1 p. b.); aplikace má smysl jako **levný kanál pro předrezervaci a navigaci** a jako **zdroj důvodů neúčasti**.
+- Výsledky platí jen pro uživatelky aplikace; nejtěžší segmenty zastihne nejméně.
 
 ---
 

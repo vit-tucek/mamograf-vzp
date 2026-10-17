@@ -123,6 +123,31 @@ pres.addSection({ title: "Segmentační model" });
   ], M + 6.0, y, CW - 6.0, 7.0 - y - 0.1, { fontSize: 15, name: "komentar" });
 }
 
+// 4b · model performance in detail
+{
+  const s = slide("Výkon segmentačního modelu podrobněji", "Segmentační model");
+  const { w } = fit(s, "segmenty_vykon.png", 1805 / 1543, M, TOP, 6.6, 5.6);
+  const x = M + w + 0.35, tw = W - M - x;
+  const hdr = (t) => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.accent1 } } });
+  const rows = [
+    ["AUROC (95% interval)", "**0,807** (±0,002)", "0,837 (±0,002)"],
+    ["AUPRC (bez modelu 0,192)", "0,469", "0,578"],
+    ["zlepšení Brier score proti „bez modelu“", "22 %", "28 %"],
+    ["kalibrační sklon (ideál 1)", "0,99", "0,98"],
+    ["kalibrace v celku", "−1,4 p. b.", "−0,6 p. b."],
+    ["přišlé v horních 20 % (lift)", "53 % (2,6×)", "58 % (2,9×)"],
+    ["nepřišlé mezi 30 % s nejnižší předpovědí (bez modelu 81 %)", "**96 %**", "97 %"],
+  ];
+  s.addTable([[hdr("2024, do 12 měsíců"), hdr("11 segmentů"), hdr("model hazardu")],
+    ...rows.map((r, i) => r.map((t) => ({ text: md(t), options: { fill: { color: i % 2 ? C.background1 : C.background2 } } })))],
+    { x, y: TOP, w: tw, colW: [tw - 2.6, 1.4, 1.2], fontSize: 12, color: C.text1, border: { type: "solid", pt: 0.5, color: "D9C4CD" },
+      valign: "middle", margin: 0.05, objectName: "tabulka_vykon" });
+  bullets(s, [
+    "Segmenty **podceňují účast o 1,4 p. b.**, protože účast mezi lety roste; rozpětí předpovědí sedí (sklon 0,99).",
+    "Pro **kampaň na nepřišlé segmenty stačí**: model hazardu je lepší hlavně u žen, které přijdou samy.",
+  ], x, 4.45, tw, 2.4, { fontSize: 14, name: "komentar_vykon" });
+}
+
 // 5 · where non-attenders are
 pres.addSection({ title: "Kde jsou nepřišlé ženy" });
 {
@@ -232,6 +257,31 @@ EXPS.forEach((rows, part) => {
       isTextBox: true, objectName: "karta_vystupy_text" });
   }
 });
+
+// 13b · experiments in the VZP app
+{
+  const s = slide("Návrhy experimentů v aplikaci VZP", "Experimenty");
+  const hdr = ["#", "Zásah (jen uživatelky aplikace)", "Cílové ženy za rok", "Výchozí účast", "MDE* při 10 / 20 / 30 % v aplikaci"]
+    .map((t) => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.accent1 } } }));
+  const rows = [
+    ["A1", "**Rezervace v aplikaci:** předrezervovaný termín, potvrzení jedním klepnutím (1. pozvánky, vypadlé 3–4 roky)", "53 600", "34,5 % (6M)", "3,7 / 2,6 / 2,1 p. b."],
+    ["A2", "**Push vs SMS × odkaz na rezervaci**, faktoriál 2 × 2 (všechny segmenty kromě zkříženého dopisu)", "248 900", "19,7 %", "1,4 / 1,0 / 0,8 p. b."],
+    ["A3", "**Dotazník bariér → cílený další krok**, ženy bez účasti do 3 měsíců („zvaná málokrát“, vypadlé 4–5+ let)", "67 600", "14,8 % (3.–12. měsíc)", "2,5 / 1,8 / 1,4 p. b."],
+  ];
+  const body = rows.map((r, i) => r.map((t, j) => ({ text: md(t), options: {
+    fill: { color: i % 2 ? C.background1 : C.background2 }, align: j >= 2 ? "center" : "left", bold: j === 0 } })));
+  s.addTable([hdr, ...body], { x: M, y: TOP, w: CW, colW: [0.55, 5.95, 1.55, 1.75, 2.333], fontSize: 14, color: C.text1,
+    border: { type: "solid", pt: 0.5, color: "D9C4CD" }, rowH: 0.75, valign: "middle", margin: 0.08, objectName: "tabulka_aplikace" });
+  const yb = TOP + 0.5 + 3 * 0.85 + 0.25;
+  s.addText("* nejmenší účinek, který pokus spolehlivě odhalí, když polovina uživatelek aplikace v cílových segmentech za rok dostane zásah a polovina zůstane kontrolou (α = 0,05, síla 80 %). Podíl uživatelek aplikace mezi pozvanými ženami zatím neznáme.",
+    { x: M, y: yb, w: CW, h: 0.55, fontSize: 11, color: C.accent4, margin: 0, isTextBox: true, objectName: "poznamka_aplikace" });
+  card(s, M, yb + 0.75, CW, 6.95 - yb - 0.75, "karta_aplikace");
+  s.addText(paras([
+    "Samotná push je slabá (0 až +1 p. b.); aplikace má smysl jako **levný kanál pro předrezervaci a navigaci** a jako **zdroj důvodů neúčasti**.",
+    "Výsledky platí jen pro uživatelky aplikace; nejtěžší segmenty zastihne nejméně.",
+  ], { fontSize: 15, color: C.text1 }, { bullet: { indent: 18 }, paraSpaceAfter: 8 }),
+    { x: M + 0.25, y: yb + 0.9, w: CW - 0.5, h: 6.95 - yb - 1.05, valign: "middle", margin: 0, isTextBox: true, objectName: "karta_aplikace_text" });
+}
 
 // 14 · limitations (dark)
 pres.addSection({ title: "Omezení" });

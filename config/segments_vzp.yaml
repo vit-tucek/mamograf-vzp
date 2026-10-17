@@ -1,0 +1,53 @@
+# Akční segmenty pro skutečná data VZP (notebooks/vzp_segmentation.ipynb).
+# Pořadí = priorita: pozvánka patří do PRVNÍHO segmentu, jehož podmínka platí.
+# Podmínky jsou pandas výrazy (DataFrame.eval) nad sloupci data_vzp/Rakhaton2026.csv po kódování
+# v notebooku: příznaky A/N -> 1/0 a odvozené sloupce
+#   BEZ_SCREENINGU = 1, pokud MONTHS_SINCE_LAST_SCREEN chybí (žádný screening za 5 let)
+#   PREVENCE       = 1, pokud OTHER_SCREENING_36M_CNT, DENTAL_PREVENTION_24M_CNT nebo GP_PREVENTION_24M_CNT >= 1
+# Páky jsou hypotézy k ověření v experimentu, ne zjištěný účinek.
+segments:
+  - id: minula_se
+    name_cs: "Dopis se minul se screeningem"
+    rule: "MONTHS_SINCE_LAST_SCREEN < 24"
+    description_cs: "Screening proběhl 0–1 měsíc před dopisem (98 %); systém zvaní o něm ještě nevěděl."
+    levers_cs: "Žádná intervence; opravit zvaní (ověřit vykázání těsně před odesláním, odklad 1–2 měsíce)."
+  - id: prvni_pozvanka
+    name_cs: "První pozvánka"
+    rule: "FIRST_INVITATION == 1"
+    description_cs: "První adresná pozvánka, většinou kolem 45. narozenin."
+    levers_cs: "Informace pro ženy, které jdou poprvé, načasování k narozeninám, sociální norma, snadné objednání."
+  - id: vypadla_3_4
+    name_cs: "Vypadlá z návyku (3–4 roky)"
+    rule: "MONTHS_SINCE_LAST_SCREEN <= 48"
+    description_cs: "Screening před 3–4 lety, od té doby ne."
+    levers_cs: "Připomínka s jednoduchým objednáním, plán kdy a kde (implementation intention)."
+  - id: vypadla_4_plus
+    name_cs: "Vypadlá z návyku (4–5+ let)"
+    rule: "MONTHS_SINCE_LAST_SCREEN > 48"
+    description_cs: "Screening před více než 4 lety."
+    levers_cs: "Osobnější připomínka (SMS, telefon), doporučení gynekologa."
+  - id: nikdy_gynekolog
+    name_cs: "Bez screeningu, chodí ke gynekologovi"
+    rule: "BEZ_SCREENINGU == 1 and GYN_PREVENTION_24M_CNT >= 1"
+    description_cs: "Za 5 let bez mamografu, ale preventivně chodí ke gynekologovi."
+    levers_cs: "Přes gynekologa: žádanka nebo objednání přímo při prohlídce."
+  - id: nikdy_prevence_malo_zvana
+    name_cs: "Bez screeningu, jiná prevence, zvaná málokrát"
+    rule: "BEZ_SCREENINGU == 1 and PREVENCE == 1 and PRIOR_INVITATION_COUNT <= 6"
+    description_cs: "Chodí na jinou prevenci (zubař, praktik, jiný screening), pozvánek dostala nejvýš 6."
+    levers_cs: "Připomínka se sociální normou, propojení s jinou prevencí (praktik, zubař), pohodlné termíny."
+  - id: nikdy_prevence_nereaguje
+    name_cs: "Bez screeningu, jiná prevence, opakovaně nereaguje"
+    rule: "BEZ_SCREENINGU == 1 and PREVENCE == 1 and PRIOR_INVITATION_COUNT >= 7"
+    description_cs: "Chodí na jinou prevenci, ale na 7 a více pozvánek nereagovala."
+    levers_cs: "Dopisy nefungují: jiný kanál (praktik, osobní kontakt), informované rozhodnutí."
+  - id: nikdy_kontakt
+    name_cs: "Bez screeningu a prevence, v kontaktu se zdravotnictvím"
+    rule: "BEZ_SCREENINGU == 1 and HEALTHCARE_CONTACT_12M_CNT >= 6"
+    description_cs: "Žádná prevence, ale aspoň 6 kontaktů se zdravotnictvím za rok."
+    levers_cs: "Oportunisticky přes ošetřující lékaře (praktik, specialisté)."
+  - id: odpojena
+    name_cs: "Odpojená"
+    rule: "True"
+    description_cs: "Bez screeningu, bez prevence, málo kontaktů se zdravotnictvím."
+    levers_cs: "Osobní kontakt a terénní práce; nejtěžší skupina, levné kanály skoro nefungují."

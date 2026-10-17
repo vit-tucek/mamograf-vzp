@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+node_modules/
+outputs/
+
+# v repozitáři jsou jen zabalená data (data/*.zip), notebooky je rozbalí vedle sebe;
+# zdrojové sady, které notebooky ke spuštění nepotřebují, leží jen lokálně v sources/
+data/*
+!data/*.zip
+sources/
+
+# data VZP jsou v gitu jen zabalená (Rakhaton2026.csv.gz); rozbalená kopie ne
+data_vzp/*.csv
+*.parquet
+
+# CatBoost: průběh učení (generuje se při každém běhu)
+catboost_info/

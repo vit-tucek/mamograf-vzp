@@ -17,3 +17,6 @@ data_vzp/*.csv
 
 # CatBoost: průběh učení (generuje se při každém běhu)
 catboost_info/
+
+# zamykací soubory Office (otevřený dokument)
+~$*

@@ -1,4 +1,8 @@
-"""Impact numbers for pitch v2: what is at stake nationally and what our targeted measures bring.
+"""Impact numbers for pitch v2: what is at stake and what our targeted measures bring.
+
+The pitch is based on VZP data: the ceiling is "all 207 201 women VZP invited in 2024 who did not come
+would come" (one screening exam each per year). The national figures (ČSÚ, ÚZIS, NOR) are computed too,
+as context and as a cross-check of the cancer count.
 
     python docs/vzp_pitch/dopad.py      (prints the table; build_pitch_v2.py imports compute())
 
@@ -68,12 +72,14 @@ def compute():
     ceiling_exams = unscreened / 2                        # everyone unscreened screened once per two years
     ceiling = metrics(ceiling_exams)
     cancers_in_unscreened = cancers_45_74 * (1 - coverage)   # cross-check, equal incidence assumed
+    vzp_ceiling = metrics(VZP_2024["not_came"])
     ours = {k: metrics(VZP_2024["B_C"] * eff_bc + VZP_2024["D_E"] * eff_de)
             for k, (eff_bc, eff_de) in {"low": (0.10, 0.02), "high": (0.19, 0.06)}.items()}
     return {"women": women, "screens_2y": screens_2y, "coverage": coverage, "unscreened": unscreened,
             "cancers_45_74": cancers_45_74, "deaths_all": deaths, "stage_mix": stage_mix,
-            "cancers_in_unscreened": cancers_in_unscreened, "ceiling": ceiling, "ours": ours,
-            "share_of_ceiling": (ours["low"]["exams"] / ceiling_exams, ours["high"]["exams"] / ceiling_exams)}
+            "cancers_in_unscreened": cancers_in_unscreened, "ceiling": ceiling, "vzp_ceiling": vzp_ceiling, "ours": ours,
+            "share_of_ceiling": (ours["low"]["exams"] / ceiling_exams, ours["high"]["exams"] / ceiling_exams),
+            "share_of_vzp_ceiling": (ours["low"]["exams"] / vzp_ceiling["exams"], ours["high"]["exams"] / vzp_ceiling["exams"])}
 
 
 if __name__ == "__main__":
@@ -83,8 +89,11 @@ if __name__ == "__main__":
     print(f"cancers 45–74 (NOR 2024): {r['cancers_45_74']:,.0f}, deaths all ages {r['deaths_all']:,.0f}; "
           f"stage mix {({k: round(v, 3) for k, v in r['stage_mix'].items()})}")
     print(f"cancers among unscreened (incidence × unscreened share): {r['cancers_in_unscreened']:,.0f}")
-    for name, m in [("ceiling", r["ceiling"]), ("ours low", r["ours"]["low"]), ("ours high", r["ours"]["high"])]:
+    for name, m in [("national", r["ceiling"]), ("VZP 2024", r["vzp_ceiling"]), ("ours low", r["ours"]["low"]),
+                    ("ours high", r["ours"]["high"])]:
         print(f"{name:10s} exams {m['exams']:>9,.0f}  cancers earlier {m['cancers']:>6,.0f}  deaths {m['deaths']:>5,.1f}  "
               f"QALY {m['qaly']:>6,.0f}  net {m['net_kc'] / 1e6:>6,.1f} M Kč")
+    lo, hi = r["share_of_vzp_ceiling"]
+    print(f"our result = {lo:.1%}–{hi:.1%} of the VZP ceiling")
     lo, hi = r["share_of_ceiling"]
-    print(f"our result = {lo:.1%}–{hi:.1%} of the ceiling")
+    print(f"            {lo:.1%}–{hi:.1%} of the national ceiling")

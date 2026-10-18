@@ -3,8 +3,9 @@
     python docs/vzp_pitch/build_pitch_v2.py        → pitch_v2.pptx        (7 segments A–G)
     python docs/vzp_pitch/build_pitch_v2.py 11     → pitch_v2_11seg.pptx  (11 segments)
 
-The national stakes and our result come from dopad.py (ČSÚ, ÚZIS and NOR data in data/, per-exam ratios of
-the team's financial model, QALY from the stage-shift model); see its docstring for every assumption.
+The stakes and our result are based on VZP data (2024 invitations) and come from dopad.py (per-exam ratios of
+the team's financial model, QALY from the stage-shift model); national ČSÚ, ÚZIS and NOR figures appear only
+in the speaker notes as context. See dopad.py's docstring for every assumption.
 """
 import sys
 
@@ -23,7 +24,8 @@ assert SEG in (7, 11)
 OUT = HERE / ("pitch_v2.pptx" if SEG == 7 else "pitch_v2_11seg.pptx")
 
 R = dopad.compute()
-CEIL, LO, HI = R["ceiling"], R["ours"]["low"], R["ours"]["high"]
+CEIL, NAT, LO, HI = R["vzp_ceiling"], R["ceiling"], R["ours"]["low"], R["ours"]["high"]
+VZP = dopad.VZP_2024
 
 
 def cz(x, nd=0):
@@ -49,14 +51,15 @@ set_notes(s, "5 s. Dobrý den, jsme Mámo, graf! z Weiner & Partners.")
 # ---------------------------------------------------------------- 1 · what is at stake (40 s)
 unscr = rnd(R["unscreened"], 10_000)
 cancers = rnd(CEIL["cancers"], 100)
-s = content_slide(prs, "CO JE VE HŘE", f"U {cz(unscr / 1000)} tisíc žen bez screeningu se nádory prsu najdou pozdě",
-                  f"Za roky 2023–2024 přišlo na screeningovou mamografii {cz(R['coverage'] * 100)} % z {cz(R['women'] / 1e6, 2)} mil. "
-                  f"žen ve věku 45–74 let. U zbylých se ročně zjistí asi {cz(cancers)} karcinomů prsu, většinou později, než by "
-                  "je našel screening.")
-badges(s, ["ÚZIS a ČSÚ", "Data VZP", "Literatura"])
-fun = [(f"{cz(R['women'] / 1e6, 2)} mil.", "žen ve věku 45–74 let (ČSÚ 2024)", NAVY),
-       (f"{cz(R['coverage'] * 100)} %", "přišlo na screening za 2 roky (ÚZIS 2023–24)", BLUE),
-       (f"≈ {cz(unscr / 1000)} tis.", "žen bez mamografie; z nich 207 tis. pozvaných VZP v roce 2024 nepřišlo", CORAL)]
+came = 1 - VZP["not_came"] / VZP["invited"]
+s = content_slide(prs, "CO JE VE HŘE", f"U {cz(VZP['not_came'] / 1000)} tisíc pozvaných žen, které nepřišly, se nádory najdou pozdě",
+                  f"V roce 2024 VZP adresně pozvala {cz(VZP['invited'])} žen, hlavně ty, které na screening dlouho nepřišly, "
+                  f"a ženy zvané poprvé. Do 12 měsíců jich přišlo {cz(came * 100)} %. Kdyby přišly všechny, screening by ročně "
+                  f"našel asi {cz(cancers)} karcinomů prsu dřív.")
+badges(s, ["Data VZP", "Literatura"])
+fun = [(cz(VZP["invited"]), "žen VZP v roce 2024 adresně pozvala (nechodí na screening nebo zvané poprvé)", NAVY),
+       (f"{cz(came * 100)} %", "přišlo do 12 měsíců", BLUE),
+       (cz(VZP["not_came"]), "žen nepřišlo", CORAL)]
 y = 2.3
 for i, (v, d, col) in enumerate(fun):
     box(s, X0, y, 3.35, 1.2)
@@ -113,23 +116,24 @@ box(s, 9.05, 2.25, 3.43, 4.45, fill=PALE)
 text(s, 9.25, 2.35, 3.05, 0.55, ["**Kdyby přišly všechny**", "teoretický strop, ročně"], size=11, color=NAVY)
 ceil = [(f"≈ {cz(cancers)}", "nádorů zachycených dřív"),
         (f"≈ {cz(rnd(CEIL['deaths'], 5))}", "odvrácených úmrtí (do 5 let od diagnózy)"),
-        (f"≈ {cz(rnd(CEIL['qaly'], 100))}", "let života ve zdraví (QALY)"),
+        (f"≈ {cz(rnd(CEIL['qaly'], 10))}", "let života ve zdraví (QALY)"),
         (f"≈ {cz(rnd(CEIL['net_kc'] / 1e6, 10))} mil. Kč", "čistá úspora (léčba IV. stadia 3 mil. Kč)")]
 for i, (v, d) in enumerate(ceil):
     yy = 3.0 + i * 0.92
     text(s, 9.25, yy, 3.05, 0.42, v, size=19, color=CORAL, bold=True)
     text(s, 9.25, yy + 0.42, 3.05, 0.42, d, size=9.5, color=BODY)
-source(s, "Zdroj: ČSÚ 2024, ÚZIS PPS 2023–24, NOR 2024; stadia: audit screeningu 2023, ÚZIS 2022; finanční model týmu (docs/vzp_pitch/dopad.py)")
+source(s, "Zdroj: data VZP pro Rakathon 2026, pozvánky 2024; stadia: audit screeningu 2023, ÚZIS 2022; finanční model týmu (docs/vzp_pitch/dopad.py)")
 set_notes(s, (
-    f"40 s. V Česku je {cz(R['women'] / 1e6, 2)} milionu žen ve věku 45 až 74 let. Za poslední dva roky přišlo na screening "
-    f"{cz(R['coverage'] * 100)} procent, zhruba {cz(unscr / 1000)} tisíc žen ne. U nich se ročně najde asi {cz(cancers)} "
-    "karcinomů prsu a jen necelá třetina v prvním stadiu; ve screeningu jsou to tři čtvrtiny. Kdyby přišly všechny, šlo by ročně "
-    f"o {cz(cancers)} nádorů zachycených dřív, asi {cz(rnd(CEIL['deaths'], 5))} odvrácených úmrtí, {cz(rnd(CEIL['qaly'], 100))} let "
-    f"života ve zdraví a {cz(rnd(CEIL['net_kc'] / 1e6, 10))} milionů korun čisté úspory. Je to teoretický strop; data VZP "
-    "pokrývají jeho část, 207 tisíc pozvaných žen, které v roce 2024 nepřišly. "
-    f"(Výpočet v docs/vzp_pitch/dopad.py. Kontrola: incidence NOR 45–74 × podíl bez screeningu = {cz(R['cancers_in_unscreened'])} "
-    "nádorů. Čistá úspora platí při ceně léčby IV. stadia 3 mil. Kč, pod 1,9 mil. Kč vychází nula; náklady modelu zahrnují "
-    "příspěvek 1 000 Kč na vyšetření, ověřit s týmem. Robustní metrika: 0,26 mil. Kč za QALY.)"))
+    f"40 s. V roce 2024 VZP adresně pozvala {cz(VZP['invited'] / 1000)} tisíc žen, které na screening dlouho nepřišly nebo byly zvané poprvé, a {cz(VZP['not_came'] / 1000)} "
+    f"tisíc z nich do roka nepřišlo. Kdyby přišly, screening by u nich ročně našel asi {cz(cancers)} karcinomů prsu dřív. Bez "
+    "screeningu je v prvním stadiu necelá třetina nádorů, ve screeningu tři čtvrtiny. Kdyby přišly všechny, šlo by ročně o asi "
+    f"{cz(rnd(CEIL['deaths'], 5))} odvrácených úmrtí, {cz(rnd(CEIL['qaly'], 10))} let života ve zdraví a {cz(rnd(CEIL['net_kc'] / 1e6, 10))} "
+    "milionů korun čisté úspory. To je teoretický strop. "
+    f"(Výpočet v docs/vzp_pitch/dopad.py, jedno vyšetření na ženu ročně. Kontext, nečíst: celostátně je {cz(R['women'] / 1e6, 2)} mil. "
+    f"žen 45–74, za dva roky přišlo {cz(R['coverage'] * 100)} %, tedy nejméně {cz(unscr / 1000)} tisíc žen bez screeningu a asi "
+    f"{cz(rnd(NAT['cancers'], 100))} nádorů ročně (ČSÚ, ÚZIS, NOR). Čistá úspora platí při ceně léčby IV. stadia 3 mil. Kč, pod "
+    "1,9 mil. Kč vychází nula; náklady modelu zahrnují příspěvek 1 000 Kč na vyšetření, ověřit s týmem. Robustní metrika: "
+    "0,26 mil. Kč za QALY.)"))
 
 # ---------------------------------------------------------------- 2 · our solution (30 s)
 s = content_slide(prs, "NAŠE ŘEŠENÍ", "Tři zdroje, segmentace klientek a nové měřitelné kanály",
@@ -210,10 +214,10 @@ for i, (v, d) in enumerate(mets):
     box(s, x, 3.8, mw, 1.25, fill=PALE)
     text(s, x + 0.18, 3.9, mw - 0.36, 0.5, v, size=18, color=NAVY, bold=True)
     text(s, x + 0.18, 4.42, mw - 0.36, 0.55, d, size=10.5, color=BODY)
-lo_s, hi_s = R["share_of_ceiling"]
+lo_s, hi_s = R["share_of_vzp_ceiling"]
 box(s, X0, 5.3, XW, 1.4, fill=WHITE)
 text(s, X0 + 0.25, 5.42, 7.2, 1.2, [
-    f"**{cz(lo_s * 100)}–{cz(hi_s * 100)} % teoretického stropu**, jen z cílených kanálů v datech VZP. Plošná digitální kaskáda "
+    f"**{cz(lo_s * 100)}–{cz(hi_s * 100)} % teoretického stropu**, jen z cílených kanálů v segmentech B–E. Plošná digitální kaskáda "
     "podle finančního modelu přinese 156 mil. Kč čistě za 2027–2031.",
     "Úspora platí při léčbě IV. stadia za 3 mil. Kč; nákladová efektivita 0,26 mil. Kč za QALY (práh SÚKL 1,2 mil.)."],
     size=10.5, color=BODY, space_after=4)

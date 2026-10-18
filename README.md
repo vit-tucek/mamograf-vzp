@@ -49,6 +49,9 @@ ukazují jen agregáty.
 - [`docs/vzp_pitch/pitch_3min.pptx`](docs/vzp_pitch/pitch_3min.pptx): tříminutový pitch na šabloně W&P se 7 segmenty,
   [`pitch_3min_11seg.pptx`](docs/vzp_pitch/pitch_3min_11seg.pptx) stejný pitch s 11 segmenty (generuje `build_pitch.py`,
   resp. `build_pitch.py 11`); závěrečný slajd zvlášť v [`zaver.pptx`](docs/vzp_pitch/zaver.pptx).
+- [`docs/vzp_pitch/pitch_v2.pptx`](docs/vzp_pitch/pitch_v2.pptx) a [`pitch_v2_11seg.pptx`](docs/vzp_pitch/pitch_v2_11seg.pptx): pitch v2
+  (co je ve hře celostátně → řešení → model → kanály → výsledek); čísla počítá [`dopad.py`](docs/vzp_pitch/dopad.py) z dat
+  ČSÚ, ÚZIS a NOR, generuje `build_pitch_v2.py [11]`.
 
 ## Okresy ČR
 
